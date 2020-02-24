@@ -7,12 +7,17 @@ class GamesController < ApplicationController
   def new
     @letters = []
     5.times { @letters << VOWELS.sample }
-    5.times { @letters << (ALPHABETS - VOWELS).sample}
+    5.times { @letters << (ALPHABETS - VOWELS).sample }
     @letters.shuffle!
+
+    score
   end
 
+  private
+
   def score
-    @letters = params[:letters].chars
+    @response = params[:letters]
+    @letters = @response.chars unless @response.blank?
     @answer = (params[:answer] || '').upcase.chars
     @score = nil
 
@@ -24,8 +29,6 @@ class GamesController < ApplicationController
       @score = "#{@answer.join('')} is not an English word"
     end
   end
-
-  private
 
   def invalid_word_count?(grid, ans)
     l_dic = {}

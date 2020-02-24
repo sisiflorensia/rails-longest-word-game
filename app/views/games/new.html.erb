@@ -8,11 +8,28 @@
   <% end %>
 </div>
 
-<div class="mt-5 py-5">
-  <form action="/score" id="answer-form">
+<div class="mt-5 pt-5">
+  <form action="/" method="post" id="answer-form">
     <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
     <input type="text" id="answer-bar" name="answer" class="w-50 mx-5" placeholder="What is the longest word you can find?">
     <input type="text" id="letters" name="letters" class="d-none" value="<%= letters_container.join('') %>">
     <input type="submit" value="Submit" class="btn btn-outline-info ml-2">
   </form>
 </div>
+
+<% if !@response.nil? %>
+  <div class="row mt-5 justify-content-around px-3 score-container">
+    <div class="col-md-5 col-sm-12 mx-auto mt-3">
+      <h3>Your answer:</h3>
+      <h2 class="text-info"><%= @answer.join('').upcase %></h2>
+    </div>
+
+    <div class="col-md-5 col-sm-12 mx-auto mt-3">
+      <h3>Your score:</h3>
+      <h2 class="text-warning"><%= @score %> out of 10</h2>
+    </div>
+  </div>
+<% end %>
+
+<%= link_to "RESET GAME", root_path, class: "btn btn-warning mt-5"  %>
+
