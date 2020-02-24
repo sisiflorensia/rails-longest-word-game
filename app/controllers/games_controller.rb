@@ -1,37 +1,56 @@
 require 'open-uri'
-require 'json'
 
 class GamesController < ApplicationController
+  VOWELS = %w(A E I O U Y)
+  ALPHABETS = ('A'..'Z').to_a
+
   def new
     @letters = []
-    10.times { @letters << [*('A'..'Z')].sample() }
+    5.times { @letters << VOWELS.sample }
+    5.times { @letters << (ALPHABETS - VOWELS).sample}
+    @letters.shuffle!
   end
 
   def score
-    @word = params[:word]
-    @letters = params[:letters]
-    @result = ''
-    word_arr = @word.upcase!.split('')
+    @letters = params[:letters].chars
+    @answer = (params[:answer] || '').upcase.chars
+    @score = nil
 
-    url = 'https://wagon-dictionary.herokuapp.com/' + @word
-    check_english = JSON.parse(open(url).read)
-
-    incl_check = word_arr.all? { |char| @letters.include?(char) ? true : false }
-    count_grid = {}
-    @letters.split('').each { |letter| count_grid.key?(letter) ? count_grid[letter] += 1 : count_grid[letter] = 1 }
-    count_word = {}
-    word_arr.each { |char| count_word.key?(char) ? count_word[char] += 1 : count_word[char] = 1 }
-
-    if check_english['found'] == false
-      @result = "Sorry, but #{@word} doesn't seem to be a valid English word."
-    elsif incl_check == false
-      @result = "Sorry, but #{@word} can't be built out of existing letters."
-    elsif count_word.all? { |k, v| v <= count_grid[k] } == false
-      @result =  "Sorry, but #{@word} can't be built out of existing letters."
+    if invalid_word_count?(@letters, @answer)
+      @score = "You can\'t build #{@answer.join('')} from #{@letters.join}"
+    elsif english_word?(@answer.join(''))
+      @score = @answer.count
     else
-      @result = "Congratulations! #{@word} seems to be a valid English word."
+      @score = "#{@answer.join('')} is not an English word"
     end
+  end
 
-    @result
+  private
+
+  def invalid_word_count?(grid, ans)
+    l_dic = {}
+    grid.each { |char| l_dic[char] ? l_dic[char] += 1 : l_dic[char] = 1 }
+    a_dic = {}
+    ans.each { |char| a_dic[char] ? a_dic[char] += 1 : a_dic[char] = 1 }
+
+    check_array = []
+    a_dic.each do |k, v|
+      if l_dic[k].nil?
+        check_array << false
+      else
+        l_dic[k] < v ? check_array << false : check_array << true
+      end
+    end
+    check_array.include? false
+  end
+
+  # def included?(word, letters)
+  #   word.chars.all? { |letter| word.count(letter) <= letters.count(letter) }
+  # end
+
+  def english_word?(word)
+    response = open("https://wagon-dictionary.herokuapp.com/#{word}")
+    json = JSON.parse(response.read)
+    json['found']
   end
 end

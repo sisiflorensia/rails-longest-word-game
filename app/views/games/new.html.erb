@@ -1,18 +1,18 @@
-<h1>New game</h1>
-
-<ul>
+<div class="letters-container d-flex justify-space-between text-center my-5">
+  <% letters_container = [] %>
   <% @letters.each do |letter| %>
-    <li class="letter">
-       <%= letter %>
-    </li>
+    <% letters_container << letter %>
+    <div class="display-4 bg-info text-white w-100 col-1 rounded-circle mx-auto p-4">
+      <%= letter %>
+    </div>
   <% end %>
-</ul>
+</div>
 
-<p>What is the longest word you can find?</p>
-
-<form class="form-inline" action="/score" method="post">
-  <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
-  <input type="hidden" name="letters" value=<%= @letters.join %>>
-  <input type="text" name="word" placeholder="Longest word">
-  <input class="btn" type="submit" value="Play">
-</form>
+<div class="mt-5 py-5">
+  <form action="/score" id="answer-form">
+    <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+    <input type="text" id="answer-bar" name="answer" class="w-50 mx-5" placeholder="What is the longest word you can find?">
+    <input type="text" id="letters" name="letters" class="d-none" value="<%= letters_container.join('') %>">
+    <input type="submit" value="Submit" class="btn btn-outline-info ml-2">
+  </form>
+</div>
